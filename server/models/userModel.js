@@ -1,3 +1,4 @@
+const { maxLength } = require('cookieparser');
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
@@ -35,6 +36,11 @@ const userSchema = new mongoose.Schema({
     xp: {
         type: Number,
         default: 0
+    },
+    sets: {
+        type: Array,
+        maxLength: 3,
+        default: []
     }
 });
 
