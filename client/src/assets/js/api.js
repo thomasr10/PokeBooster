@@ -10,9 +10,13 @@ export async function apiFetch(url, options = {}) {
         },
     });
 
-    if(response.status === 401) {
+    if (response.status === 401) {
         logout();
         throw new Error("Session expirée. Veuillez vous reconnecter");
+    }
+
+    if (!response.ok) {
+        throw new Error(`Erreur HTTP : ${response.status}`);
     }
 
     return response.json();

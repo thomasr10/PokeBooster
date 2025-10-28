@@ -40,7 +40,7 @@ const userSchema = new mongoose.Schema({
     sets: {
         type: Array,
         maxLength: 3,
-        default: []
+        default: ["swsh1", "dp1", "hgss1"]
     }
 });
 

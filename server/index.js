@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const userRoutes = require('./routes/userRoutes');
+const pokemonRoutes = require('./routes/pokemonRoutes');
 const connectDB = require('./config/database');
 const User = require('./models/userModel');
 
@@ -22,3 +23,4 @@ connectDB(dbUrl).then(() => {
 }).catch((err) => console.error(err));
 
 app.use('/api/user', userRoutes);
+app.use('/api/pokemon', pokemonRoutes);
