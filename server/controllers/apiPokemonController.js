@@ -8,7 +8,7 @@ exports.getAllSets = async (req, res) => {
         const apiResponse = await fetch('https://api.pokemontcg.io/v2/sets?page=1&pageSize=150&orderBy=releaseDate', {
             method: 'GET',
             headers: {
-                'X-Api-Key': `Bearer ${API_KEY}`
+                'X-Api-Key': API_KEY
             }
         });
 
@@ -21,7 +21,7 @@ exports.getAllSets = async (req, res) => {
         return res.status(200).json({ data });
 
     } catch(e) {
-        throw new Error(`Erreur lors de la récupération des données : ${e}`);
+        throw new Error(e);
     }
 
 }

@@ -6,21 +6,24 @@ export default function Profil() {
 
     const token = localStorage.getItem('token');
     const decodedToken = jwtDecode(token);
+    const [initialUserSets, setInitialUserSets] = useState([]);
     const [userSets, setUserSets] = useState([]);
     const [allSets, setAllSets] = useState([]);
+    const [userId, setUserId] = useState(null);
 
-    const [newSet1, setNewSet1] = useState('');
-    const [newSet2, setNewSet2] = useState('');
-    const [newSet3, setNewSet3] = useState('');
+    useEffect(() => {
+        setUserId(decodedToken.userId);
+    }, [decodedToken])
 
     // Récupération des sets de l'utilisateur
     useEffect(() => {
         getUserInfos(decodedToken.userId)
             .then((data) => {
                 setUserSets(data.user.sets);
+                setInitialUserSets(data.user.sets);
             })
             .catch((e) => console.error(e));
-    }, [decodedToken.userId]);
+    }, [userId]);
 
 
     // Récupération de tous les sets
@@ -42,23 +45,45 @@ export default function Profil() {
     }
 
     useEffect(() => {
-        getPokeSets()
-            .then((data) => {
-                console.log(data.data.data)
-                const filterArray = data.data.data.filter((set) => set.id === 'swsh1' || set.id === 'dp1' || set.id === 'bw1' || set.id === 'hgss1' || set.id === 'svp');
-                setAllSets(filterArray);
-            })
-            .catch((e) => console.error(e));
+        if(!localStorage.getItem('sets')) {
+            getPokeSets()
+                .then((data) => {
+                    const filterArray = data.data.data.filter((set) => set.id === 'swsh1' || set.id === 'dp1' || set.id === 'bw1' || set.id === 'hgss1' || set.id === 'svp');
+                    setAllSets(filterArray);
+                    localStorage.setItem('sets', JSON.stringify(filterArray));
+                })
+                .catch((e) => console.error(e));            
+        } else {
+            setAllSets(JSON.parse(localStorage.getItem('sets')));
+        }
+
     }, []);
 
+
+    // Modifier le tableau userSet
+    const changeUserSetArray = (previousSet, newSet) => {
+
+        setUserSets(prev => {
+            const newUserSets = [...prev];
+            newUserSets[previousSet] = newSet;
+            return newUserSets;
+        });
+
+    }
+
+
+    // Valider le tableau modifier en bdd
     const submitSets = async () => {
+
         try {
             const data = await apiFetch('http://localhost:3000/api/user/sets/modify', {
                 method: 'POST',
-                body: JSON.stringify({})
+                body: JSON.stringify({ userSets, userId })
             });
 
-            return data;
+            setInitialUserSets(userSets);
+            
+            console.log(data.message);
 
         } catch (e) {
             console.error(e);
@@ -68,28 +93,30 @@ export default function Profil() {
     return (
         <section>
             <h1>Profil</h1>
-            {
-                userSets.length > 0 && (
-                    userSets.map((set) => (
-                        <div>
-                            <select name="set-id" key={set}>
-                                <option value={set}>{set}</option>
-                                {
-                                    allSets.map((additionalSets) => (
-                                        (userSets.includes(additionalSets.id)) ?
+            <div>
+                {
+                    userSets.length > 0 && (
+                        userSets.map((set, index) => (
 
-                                            (additionalSets.id === set) ? '' : <option value={additionalSets.id} disabled key={additionalSets.id}>{additionalSets.id}</option> :
+                    <select name="set-id" key={set} onChange={(e) => changeUserSetArray(index, e.target.value)}>
+                        <option value={set}>{set}</option>
+                        {
+                            allSets.map((additionalSets) => (
+                                (userSets.includes(additionalSets.id)) ?
 
-                                            <option value={additionalSets.id} key={additionalSets.id}>{additionalSets.id}</option>
+                                    (additionalSets.id === set) ? '' : <option value={additionalSets.id} disabled key={additionalSets.id}>{additionalSets.id}</option> :
 
-                                    ))
-                                }
-                            </select>
-                            <button onClick={submitSets}>Valider</button>
-                        </div>
+                                    <option value={additionalSets.id} key={additionalSets.id}>{additionalSets.id}</option>
+
+                            ))
+                        }
+                    </select>
+
                     ))
-                )
-            }
+                    )                
+                }
+                <button disabled={JSON.stringify(initialUserSets) === JSON.stringify(userSets)} onClick={submitSets}>Valider</button>
+            </div>
         </section>
     )
 }
