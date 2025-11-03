@@ -4,8 +4,6 @@ const dotenv = require('dotenv');
 const userRoutes = require('./routes/userRoutes');
 const pokemonRoutes = require('./routes/pokemonRoutes');
 const connectDB = require('./config/database');
-const User = require('./models/userModel');
-
 const app = express();
 dotenv.config();
 const PORT = process.env.PORT;
